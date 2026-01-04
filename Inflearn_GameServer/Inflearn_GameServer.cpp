@@ -145,3 +145,81 @@
 //
 //	std::cout << v.size() << std::endl;
 //}
+
+//	8. DeadLock
+//
+//#include "AccountManager.h"
+//#include "UserManager.h"
+//
+//void Func1()
+//{
+//	for (int32 i = 0; i < 100; ++i)
+//	{
+//		UserManager::Instance()->ProcessSave();
+//	}
+//}
+//
+//void Func2()
+//{
+//	for (int32 i = 0; i < 100; ++i)
+//	{
+//		AccountManager::Instance()->ProcessLogin();
+//	}
+//}
+//
+//int main()
+//{
+//	std::thread t1(Func1);
+//	std::thread t2(Func2);
+//
+//	t1.join();
+//	t2.join();
+//
+//	std::cout << "Jobs Done" << std::endl;
+//}
+
+//	10. SpinLock
+//
+
+class SpinLock {
+public:
+	void lock()
+	{
+
+	}
+
+	void unlock()
+	{
+
+	}
+};
+
+std::mutex m;
+int32 sum = 0;
+
+void Add()
+{
+	for (int32 i = 0; i < 10'0000; ++i)
+	{
+		std::lock_guard<std::mutex> guard(m);
+		sum++;
+	}
+}
+
+void Sub()
+{
+	for (int32 i = 0; i < 10'0000; ++i)
+	{
+		std::lock_guard<std::mutex> guard(m);
+		sum--;
+	}
+}
+
+int main()
+{
+	std::thread t1(Add);
+	std::thread t2(Sub);
+
+	t1.join();
+	t2.join();
+}
