@@ -618,7 +618,61 @@
 //	17. 메모리 관리
 //
 
-//	
+//std::atomic<bool> ready;
+//int32 value;
+//
+//void Producer()
+//{
+//	value = 10;
+//
+//	ready.store(true, std::memory_order::memory_order_seq_cst);
+//}
+//
+//void Consumer()
+//{
+//	while (ready.load(std::memory_order::memory_order_seq_cst) == false)
+//		;
+//
+//	std::cout << value << std::endl;
+//}
+//
+//int main()
+//{
+//	ready = false;
+//	value = 0;
+//	std::thread t1(Producer);
+//	std::thread t2(Consumer);
+//	t1.join();
+//	t2.join();
+//
+//	//Memory Model(정책)
+//	//	1) Sequentially Consistent(seq_cst)
+//	//	2) Acquire - Release(consume, acquire, release, acq_rel)
+//	//	3) Relaxed(relaxed)
+//
+//	//	1) seq_cst(가장 엄격 = 컴파일러 최적화 여지 적음 = 직관적)
+//	//		가시성 문제 바로 해결, 코드 재배치 바로 해결
+//	// 
+//	//	2) acquire - release
+//	//		딱 중간
+//	//		release 명령 이전의 메모리 명령들이, 해당 명령 이후로 재배치 되는 것을 금지
+//	// 
+//	//	3) relaxed(자유롭다 = 컴파일러 최적화 여지 많음 = 직관적이지 않음)
+//	//		너무나도 자유롭다, 코드 재배치도 멋대로 가동, 가시성 해결 X
+//	//		가장 기본 조건 (동일 객체에 대한 동일 관전 순서만 보장)
+//	//
+//}
+
+//class Knight {
+//
+//	int32 hp;
+//	int32 mp;
+//
+//public:
+//	Knight() :  hp(5), mp(6) {
+//
+//	}
+//};
 //
 //std::atomic<bool> flag;
 //
@@ -634,8 +688,107 @@
 //
 //	//	이전 flag 값을 prev에 넣고, flag 값을 수정
 //	{
-//		bool prev = flag;
-//
-//		flag = true;
+//		bool prev = flag.exchange(true);
+//		/*bool prev = flag;
+//		flag = true;*/
 //	}
+//
+//	{
+//		bool expected = false;
+//		bool desired = true;
+//		flag.compare_exchange_strong(expected, desired);
+//	}
+//
+//	{
+//		std::atomic<int64> v;
+//		std::cout << v.is_lock_free() << std::endl;
+//	}
+//
+//	{
+//		std::atomic<Knight> v;
+//		std::cout << v.is_lock_free() << std::endl;
+//	}
+//}
+
+//	18. Thread Local Storage
+//
+
+//	TLS는 쓰레드별로 본인만 가지는 저장소
+//	Heap 영역과	Data 영역은 쓰레드 끼리 공유가 가능하지만 TLS는 불가능
+//	스택과 TLS가 다른게 뭐냐
+//	스택은 함수를 위한 메모리 공간
+
+//using namespace std::chrono_literals;
+//
+//thread_local int32 LThreadId = 0;
+//
+//
+//void ThreadMain(int32 threadId)
+//{
+//	LThreadId = threadId;
+//
+//	while (true)
+//	{
+//
+//		std::cout << "Hi! I am Thread " << LThreadId << std::endl;
+//		std::this_thread::sleep_for(1s);
+//	}
+//}
+//
+//int main()
+//{
+//	std::vector<std::thread> threads;
+//
+//	for (int32 i = 0; i < 10; ++i)
+//	{
+//		int32 threadId = i + 1;
+//		threads.push_back(std::thread(ThreadMain, threadId));
+//	}
+//
+//	for (std::thread& t : threads)
+//	{
+//		t.join();
+//	}
+//}
+
+//	19. Lock-Based Stack / Queue
+//
+
+//#include "ConcurrentQueue.h"
+//#include "ConcurrentStack.h"
+//
+//using namespace std::chrono_literals;
+//
+//LockQueue<int32> q;
+//LockStack<int32> s;
+//
+//void Push()
+//{
+//	while (true)
+//	{
+//		int32 value = rand() % 100;
+//		q.Push(value);
+//
+//		std::this_thread::sleep_for(10ms);
+//	}
+//}
+//
+//void Pop()
+//{
+//	while (true)
+//	{
+//		int32 data = 0;
+//		if (q.TryPop(OUT data))
+//			std::cout << data << std::endl;
+//	}
+//}
+//
+//int main()
+//{
+//	std::thread t1(Push);
+//	std::thread t2(Pop);
+//	std::thread t3(Pop);
+//
+//	t1.join();
+//	t2.join();
 //}
