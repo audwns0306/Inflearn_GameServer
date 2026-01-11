@@ -151,8 +151,8 @@
 //	8. DeadLock
 //
 
-//#include "AccountManager.h"
-//#include "UserManager.h"
+#include "AccountManager.h"
+#include "UserManager.h"
 //
 //void Func1()
 //{
@@ -754,8 +754,8 @@
 //	19. Lock-Based Stack / Queue
 //
 
-//#include "ConcurrentQueue.h"
-//#include "ConcurrentStack.h"
+#include "ConcurrentQueue.h"
+#include "ConcurrentStack.h"
 //
 //using namespace std::chrono_literals;
 //
@@ -791,4 +791,45 @@
 //
 //	t1.join();
 //	t2.join();
+//}
+
+//	20. Lock-Free Stack
+//
+
+
+//using namespace std::chrono_literals;
+//
+//LockQueue<int32> q;
+//LockFreeStack<int32> s;
+//
+//void Push()
+//{
+//	while (true)
+//	{
+//		int32 value = rand() % 100;
+//		s.Push(value);
+//
+//		/*std::this_thread::sleep_for(10ms);*/
+//	}
+//}
+//
+//void Pop()
+//{
+//	while (true)
+//	{
+//		int32 data = 0;
+//		if (s.TryPop(OUT data))
+//			std::cout << data << std::endl;
+//	}
+//}
+//
+//int main()
+//{
+//	std::thread t1(Push);
+//	std::thread t2(Pop);
+//	std::thread t3(Pop);
+//
+//	t1.join();
+//	t2.join();
+//	t3.join();
 //}
