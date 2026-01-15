@@ -197,7 +197,7 @@ class LockFreeStack
 
 	struct Node
 	{
-		Node(const T& value) : data(std::make_shared<T>(value)), next(nullptr)
+		Node(const T& value) : data(std::make_shared<T>(value))
 		{
 
 		}
@@ -211,7 +211,7 @@ public:
 	void Push(const T& value)
 	{
 		CountedNodePtr node;
-		node.ptr = new node(value);
+		node.ptr = new Node(value);
 		node.externalCount = 1;
 		node.ptr->next = _head;
 		while (_head.compare_exchange_weak(node.ptr->next, node) == false)
@@ -235,7 +235,7 @@ public:
 			if (_head.compare_exchange_strong(oldHead, ptr->next))
 			{
 				std::shared_ptr<T> res;
-				res->swap(ptr->data);
+				res.swap(ptr->data);
 
 				//	external : 1 -> 2(³ª+1) -> 4(³ª+1 ³²+2)
 				//	internal : 1 -> 0

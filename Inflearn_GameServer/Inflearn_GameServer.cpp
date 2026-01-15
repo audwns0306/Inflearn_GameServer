@@ -796,45 +796,159 @@
 //	20~22. Lock-Free Stack
 //
 
+//using namespace std::chrono_literals;
+//
+//LockQueue<int32> q;
+//LockFreeStack<int32> s;
+//
+//void Push()
+//{
+//	while (true)
+//	{
+//		int32 value = rand() % 100;
+//		s.Push(value);
+//
+//		/*std::this_thread::sleep_for(10ms);*/
+//	}
+//}
+//
+//void Pop()
+//{
+//	while (true)
+//	{
+//		auto data = s.TryPop();
+//		if(data!=nullptr)
+//		{
+//			std::cout << (*data) << std::endl;
+//		}
+//	}
+//}
+//
+//int main()
+//{
+//	std::shared_ptr<int32> ptr;
+//	bool value = std::atomic_is_lock_free(&ptr);
+//
+//	std::thread t1(Push);
+//	std::thread t2(Pop);
+//	std::thread t3(Pop);
+//
+//	t1.join();
+//	t2.join();
+//	t3.join();
+//}
 
-using namespace std::chrono_literals;
+//	24. ThreadManager
+#include "ThreadManager.h"
 
-LockQueue<int32> q;
-LockFreeStack<int32> s;
 
-void Push()
-{
-	while (true)
-	{
-		int32 value = rand() % 100;
-		s.Push(value);
+//CoreGlobal Core;
+//
+//using namespace std::chrono_literals;
+//
+//void ThreadMain()
+//{
+//	while (true)
+//	{
+//		std::cout << "Hello ! I am Thread... " << LThreadId << std::endl;
+//		std::this_thread::sleep_for(1s);
+//	}
+//}
+//
+//int main()
+//{
+//	for (int32 i = 0; i < 5; ++i)
+//	{
+//		GThreadManager->Launch(ThreadMain);
+//	}
+//
+//	GThreadManager->Join();
+//}
 
-		/*std::this_thread::sleep_for(10ms);*/
-	}
-}
+//	28. Reference Counting
+#include "RefCounting.h"
 
-void Pop()
-{
-	while (true)
-	{
-		auto data = s.TryPop();
-		if(data!=nullptr)
-		{
-			std::cout << (*data) << std::endl;
-		}
-	}
-}
+//class Wraight : public RefCountable
+//{
+//public:
+//	int _hp = 150;
+//	int _posX = 0;
+//	int _posY = 0;
+//};
+//
+//using WraightRef = TSharedPtr<Wraight>;
+//
+//class Missile : public RefCountable
+//{
+//public:
+//	void SetTarget(WraightRef target)
+//	{
+//		_target = target;
+//		//target->AddRef();
+//		Test(target);
+//	}
+//	//	참조하게 되면 RefCount 증가 X
+//	void Test(WraightRef& target)
+//	{
+//
+//	}
+//
+//	bool Update()
+//	{
+//		if (_target == nullptr)
+//			return true;
+//
+//		int posX = _target->_posX;
+//		int posY = _target->_posY;
+//
+//		if (_target->_hp == 0)
+//		{
+//			_target->ReleaseRef();
+//			_target = nullptr;
+//			return true;
+//		}
+//
+//		return false;
+//	}
+//
+//	WraightRef _target = nullptr;
+//};
+//
+//
+//using MissileRef = TSharedPtr<Missile>;
+//
+//int main()
+//{
+//	WraightRef wraight(new Wraight());
+//	wraight->ReleaseRef();
+//	MissileRef missile(new Missile());
+//	missile->ReleaseRef();
+//
+//	missile->SetTarget(wraight);
+//
+//	// 레이스가 피격 당함
+//	wraight->_hp = 0;
+//	//wraight->ReleaseRef();
+//	wraight = nullptr;
+//
+//	while (true)
+//	{
+//		if (missile->Update())
+//		{
+//			missile->ReleaseRef();
+//			missile = nullptr;
+//		}
+//	}
+//
+//}
+
+//	29. Smart Pointer
 
 int main()
 {
-	std::shared_ptr<int32> ptr;
-	bool value = std::atomic_is_lock_free(&ptr);
-
-	std::thread t1(Push);
-	std::thread t2(Pop);
-	std::thread t3(Pop);
-
-	t1.join();
-	t2.join();
-	t3.join();
+	
+	//	우리가 만든 SharedPtr방식의 한계
+	// 
+	//	1) 이미 만들어진 클래스 대상으로 사용 불가
+	//	2) 순환 (Cycle) 문제
 }
