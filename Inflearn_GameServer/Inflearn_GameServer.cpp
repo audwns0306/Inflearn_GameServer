@@ -1661,6 +1661,12 @@ struct Session
 	WSAOVERLAPPED overlapped = {};
 };
 
+void CALLBACK RecvCallback(DWORD error, DWORD recvLen, LPWSAOVERLAPPED overlapps, DWORD flags)
+{
+	std::cout << "Data Recv Len Callback = " << recvLen << std::endl;
+	// TODO : echo 서버를 만든다면 WSASend()
+}
+
 int main()
 {
 	WSAData wsaData;
@@ -1689,21 +1695,20 @@ int main()
 
 	std::cout << "Accept" << std::endl;
 
-	// Overlapped (이벤트 기반)
-	// - 비동기 입출력 지원하는 소켓 생성 + 통지 받기 위한 이벤트 객체 생성
-	// - 비동기 입출력 함수 호출 (1에서 만든 이벤트 객체를 같이 넘겨줌)
+	// Overlapped (Completion Routine 콜백 기반)
+	// - 비동기 입출력 지원하는 소켓 생성
+	// - 비동기 입출력 함수 호출 (완료 루틴의 시작 주소를 넘겨준다)
 	// - 비동기 작업이 바로 완료되지 않으면, WSA_IO_PENDING 오류 코드
-	// 운영체제는 이벤트 객체를 signaled 상태로 만들어서 완료 상태 알려줌
-	// - WSAWaitForMultipleEvents 함수 호출해서 이벤트 객체의 signal 판별
-	// - WSAGetOverlappedResult 호출해서 비동기 입출력 결과 확인 및 데이터 처리
-
-	// 1) 비동기 소켓
-	// 2) 넘겨준 overlapped 구조체
-	// 3) 전송된 바이트 수
-	// 4) 비동기 입출력 작업이 끝날때까지 대기할지?
-	// false
-	// 5) 비동기 입출력 작업 관련 부가 정보. 거의 사용 안 함.
-	// WSAGetOverlappedResult
+	// - 비동기 입출력 함수 호출한 쓰레드를 -> Alertable Wait 상태로 만든다
+	// ex) WaitForSingleObjectEx, WaitForMultipleObjectsEx, SleepEx, WSAWaitForMultipleEvents
+	// - 비동기 IO 완료되면, 운영체제는 완료 루틴 호출
+	// - 완료 루틴 호출이 모두 끝나면, 쓰레드는 Alertable Wait 상태에서 빠져나온다.
+	
+	// 1) 오류 발생시 0 아닌 값
+	// 2) 전송 바이트 수
+	// 3) 비동기 입출력
+	//
+	// void CompletionRoutine()
 
 	while (true)
 	{
@@ -1725,7 +1730,6 @@ int main()
 
 		Session session = Session{ clientSocket };
 		WSAEVENT wsaEvent = ::WSACreateEvent();
-		session.overlapped.hEvent = wsaEvent;
 
 		std::cout << "Client Connected !" << std::endl;
 
@@ -1737,13 +1741,14 @@ int main()
 
 			DWORD recvLen = 0;
 			DWORD flags = 0;
-			if (::WSARecv(clientSocket, &wsaBuf, 1, &recvLen, &flags, &session.overlapped, nullptr) == SOCKET_ERROR)
+			if (::WSARecv(clientSocket, &wsaBuf, 1, &recvLen, &flags, &session.overlapped, RecvCallback) == SOCKET_ERROR)
 			{
 				if (::WSAGetLastError() == WSA_IO_PENDING)
 				{
 					// Pending
-					::WSAWaitForMultipleEvents(1, &wsaEvent, TRUE, WSA_INFINITE, FALSE);
-					::WSAGetOverlappedResult(session.socket, &session.overlapped, &recvLen, FALSE, &flags);
+					// Alertable Wait
+					::SleepEx(INFINITE, TRUE);
+					//::WSAWaitForMultipleEvents(1, &wsaEvent, TRUE, WSA_INFINITE, FALSE);
 				}
 				else
 				{
@@ -1751,8 +1756,10 @@ int main()
 					break;
 				}
 			}
-
+			else
+			{
 			std::cout << "Data Recv Len = " << recvLen << std::endl;
+			}
 		}
 		::closesocket(session.socket);
 	}
