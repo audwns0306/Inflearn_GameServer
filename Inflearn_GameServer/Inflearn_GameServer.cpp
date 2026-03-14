@@ -1933,23 +1933,59 @@
 //	51.	IocpCore
 
 #include "Listener.h"
+#include "Session.h"
+#include "CoreMacro.h"
 
-int main()
-{
-	Listener listener;
-	listener.StartAccept(NetAddress(L"127.0.0.1", 7777));
+//int main()
+//{
+//	Listener listener;
+//	listener.StartAccept(NetAddress(L"127.0.0.1", 7777));	//	NetAddress(L"127.0.0.1", 7777) 임시객체생성
+//															//	이걸 prvalue (pure value)라고 한다
+//															//	생성자 호출
+//															//	객체 메모리 생성
+//															//	함수 인자로 전달됨
+//															//	함수 끝나면 파괴됨
+//	for (int32 i = 0; i < 5; ++i)
+//	{
+//		GThreadManager->Launch([=]()
+//			{
+//				while (true)
+//				{
+//					GIocpCore.Dispatch();
+//				}
+//			}
+//		);
+//	}
+//
+//	GThreadManager->Join();
+//}
 
-	for (int32 i = 0; i < 5; ++i)
-	{
-		GThreadManager->Launch([=]()
-			{
-				while (true)
-				{
-					GIocpCore.Dispatch();
-				}
-			}
-		);
-	}
+//	52. Server Service
 
-	GThreadManager->Join();
-}
+#include "Service.h"
+
+//class GameSession : public Session
+//{
+//
+//};
+//
+//int main()
+//{
+//	ServerServiceRef service = std::make_shared<ServerService>(NetAddress(L"127.0.0.1", 7777),std::make_shared<IocpCore>(), std::make_shared<GameSession>, 100);
+//
+//	service->Start();
+//
+//		for (int32 i = 0; i < 5; ++i)
+//		{
+//			GThreadManager->Launch([=]()
+//				{
+//					while (true)
+//					{
+//						service->GetIocpCore()->Dispatch();
+//					}
+//				});
+//		}
+//	
+//		GThreadManager->Join();
+//}
+
